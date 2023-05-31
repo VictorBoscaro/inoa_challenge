@@ -20,3 +20,17 @@ class AssetPrice(models.Model):
 
     def __str__(self):
         return self.symbol + "_" + self.datetime.strftime("%Y-%m-%d %H:%m")
+    
+class B3Companie(models.Model):
+
+    symbol = models.CharField()
+    minutes_update_rate = models.IntegerField()
+    run = models.DateField(auto_now=True)
+
+    class Meta:
+        db_table = 'b3_companies'
+        app_label = 'get_and_update_data'
+        unique_together = (('symbol', 'run'), )
+
+    def __str__(self):
+        return self.symbol + "_" + self.run.strftime("%Y-%m-%d")

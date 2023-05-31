@@ -6,14 +6,22 @@ from get_and_update_data.models import AssetPrice
 from get_and_update_data.get_and_upload_data import PriceGetter, UploadData
 import pandas as pd
 
+import os
+
+if "DJANGO_SETTINGS_MODULE" in os.environ:
+    print("Django settings is in the enviroment")
+else:
+    print("Django is not in the project")
+
 class PriceGetterTestCase(TestCase):
     def setUp(self):
         # Set up any necessary data or dependencies for the test
         
+        
         # Create some AssetPrice objects for testing
-        AssetPrice.objects.create(symbol='PETR4.SA', datetime=datetime.now(), open=100.0, high=105.0, low=99.0, close=102.0, adj_close=101.0, volume=100000, run=datetime.now())
-        AssetPrice.objects.create(symbol='CMIG4.SA', datetime=datetime.now(), open=200.0, high=205.0, low=199.0, close=202.0, adj_close=201.0, volume=200000, run=datetime.now() - timedelta(minutes=70))
-        AssetPrice.objects.create(symbol='PETR4.SA', datetime=datetime.now(), open=100.0, high=105.0, low=99.0, close=102.0, adj_close=101.0, volume=100000, run=datetime.now())
+        AssetPrice.objects.create(symbol='PETR4.SA', datetime=datetime.now() - timedelta(minutes=120), open=100.0, high=105.0, low=99.0, close=102.0, adj_close=101.0, volume=100000, run=datetime.now() - timedelta(minutes=120))
+        AssetPrice.objects.create(symbol='CMIG4.SA', datetime=datetime.now() - timedelta(minutes=60), open=200.0, high=205.0, low=199.0, close=202.0, adj_close=201.0, volume=200000, run=datetime.now() - timedelta(minutes=70))
+        AssetPrice.objects.create(symbol='PETR4.SA', datetime=datetime.now() - timedelta(minutes=120), open=100.0, high=105.0, low=99.0, close=102.0, adj_close=101.0, volume=100000, run=datetime.now() - timedelta(minutes=120))
     
     def test_get_new_data(self):
         # Test the get_new_data method of PriceGetter
@@ -45,6 +53,7 @@ class PriceGetterTestCase(TestCase):
         
         # Clean up any created data after the test (if necessary)
         AssetPrice.objects.all().delete()
+        print(new_data.head(), new_data.shape)  
 
 class DataUploadTestCase(TestCase):
 
@@ -52,9 +61,10 @@ class DataUploadTestCase(TestCase):
     def test_upload_new_data(self):
 
         data_uploader = UploadData()
-        data_uploader.upload_new_data()
+        data_uploaded = data_uploader.upload_new_data()
         new_data = data_uploader._data_to_upload
-
+        print(data_uploaded)
+        
         uploaded_data = AssetPrice.objects.all()
         self.assertEqual(len(uploaded_data), len(new_data))
 

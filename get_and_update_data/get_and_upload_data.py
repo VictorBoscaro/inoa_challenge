@@ -6,6 +6,7 @@ from datetime import datetime
 from datetime import timedelta
 from get_and_update_data.models import AssetPrice
 from django.db import models
+import pytz
 
 class PriceGetter:
  
@@ -14,7 +15,8 @@ class PriceGetter:
         
     def companies_to_get_data(self):
         
-        now = datetime.today()
+        target_timezone = pytz.timezone("America/Sao_Paulo")
+        now = target_timezone.localize(datetime.today())
         companies_to_get_data = []
         
         results = AssetPrice.objects.values("symbol").annotate(max_run=models.Max('run'), max_datetime=models.Max("datetime"))
@@ -23,21 +25,23 @@ class PriceGetter:
         for result in results:
             
             symbol = result['symbol']
-            max_run = result['max_run'].replace(tzinfo=None)
+            max_run = result['max_run']
             max_datetime = result['max_datetime']
 
-            max_run = datetime(2023, 5, 26, 11) #### COMENTAR ESSA LINHA PARA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
+            # max_run = datetime(2023, 5, 26, 11) #### COMENTAR ESSA LINHA PARA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
             
             if (now - max_run).total_seconds() // 60 >= self._configs[symbol]:
+                # print((now - max_run).total_seconds() // 60, max_run, now)
                 companies_to_get_data.append(symbol)
                 max_datetime_dict[symbol] = max_datetime
             else:
+                print((now - max_run).total_seconds() // 60, max_run, now)
                 print(f"Company {symbol} was updated less than {self._configs[symbol]} minutes ago.")
                 
         return companies_to_get_data, max_datetime_dict
     
     def call_yahoo_api(self, start_date, end_date, update_freq, run, company):
-        
+        print(start_date, end_date)
         data = yf.download(company, 
                            start = int(start_date.timestamp()), 
                            end = int(end_date.timestamp()), 
@@ -57,18 +61,18 @@ class PriceGetter:
         
         final_df = pd.DataFrame()
         run = datetime.now()
-        run = datetime(2023, 5, 26, 11) ######## COMENTAR ESSA LINHA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
+        # run = datetime(2023, 5, 26, 11) ######## COMENTAR ESSA LINHA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
         
         for company in companies_to_update:
             
             start_date = max_datetime_dict[company] 
-            start_date = datetime(2023, 5, 26, 11) ######## COMENTAR ESSA LINHA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
+            # start_date = datetime(2023, 5, 26, 11) ######## COMENTAR ESSA LINHA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
             end_date = start_date + timedelta(minutes=60)
                 
             if (run.hour >= 10) & (run.hour <= 16):
                 print("Calling yahoo finance API.")
-                start_date = run
-                end_date = run + timedelta(minutes=60)
+                start_date = start_date - timedelta(1)
+                # end_date = run + timedelta(minutes=60)
                 data = self.call_yahoo_api(start_date, end_date, update_freq, run, company)
                 final_df = pd.concat([final_df, data], axis = 0)
             else:
@@ -93,6 +97,7 @@ class UploadData():
     def upload_new_data(self):
 
         data = self._data_to_upload
+        data_uploaded = []
 
         for _, row in data.iterrows():
             datetime = row['datetime']
@@ -114,5 +119,8 @@ class UploadData():
                     run=row['run']
                 )
                 asset_price.save()
+                data_uploaded.append([row['datetime'], row['symbol'], row['open'], row['high'], row['close'], row['adj_close'], row['volume'], row['run']])
             else:
                 print("There is not new data to upload")
+        
+        return data_uploaded

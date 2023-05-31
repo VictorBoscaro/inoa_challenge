@@ -38,10 +38,19 @@ class B3Companies:
         raise ValueError("It is not possible to change the symbols list, only add to it.")
         return self._symbols
     
-    def add_new_company(self, company):
+    def add_new_company(self, company, update_frequency):
+
+            if isinstance(company, str) and isinstance(update_frequency, int):
+                new_dict = {}
+                new_dict[company] = update_frequency
+                self._symbols.update(new_dict)
+            else:
+                 raise ValueError("Company must be string and update_frequency int.")
+
         
-        if isinstance(company, list):
-            self._symbols = self._symbols + company
-        else:
-            company = list(company)
-            self._symbols = self._symbols + company
+        
+
+class UpdateFrequency:
+    
+    def __init__(self, freq = "60m"):
+        self.freq = freq
