@@ -1,4 +1,4 @@
-from get_and_update_data.companies_configs import B3Companies
+from get_and_update_data.configs import B3Companies, UpdateFrequency
 from datetime import datetime
 import yfinance as yf
 import pandas as pd
@@ -6,11 +6,6 @@ from datetime import datetime
 from datetime import timedelta
 from get_and_update_data.models import AssetPrice
 from django.db import models
-
-class UpdateFrequency:
-    
-    def __init__(self, freq = "60m"):
-        self.freq = freq
 
 class PriceGetter:
  
