@@ -28,17 +28,16 @@ class PriceGetter:
         for result in results:
             
             symbol = result['symbol']
-            max_run = result['max_run']
+            max_run = result['max_run'].replace(tzinfo=None)
             max_datetime = result['max_datetime']
 
-            max_run = datetime(2023, 5, 23, 11)
-
-            print(type(max_run), type(now))
+            max_run = datetime(2023, 5, 26, 11) #### COMENTAR ESSA LINHA PARA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
+            
             if (now - max_run).total_seconds() // 60 >= self._configs[symbol]:
                 companies_to_get_data.append(symbol)
                 max_datetime_dict[symbol] = max_datetime
             else:
-                print(f"Company {symbol} was updated in less than {self._configs[symbol]} minutes")
+                print(f"Company {symbol} was updated less than {self._configs[symbol]} minutes ago.")
                 
         return companies_to_get_data, max_datetime_dict
     
@@ -62,11 +61,13 @@ class PriceGetter:
         
         
         final_df = pd.DataFrame()
-        run = datetime(2023, 5, 23, 11)
+        run = datetime.now()
+        run = datetime(2023, 5, 26, 11) ######## COMENTAR ESSA LINHA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
         
         for company in companies_to_update:
             
-            start_date = datetime(2023, 5, 23, 11)
+            start_date = max_datetime_dict[company] 
+            start_date = datetime(2023, 5, 26, 11) ######## COMENTAR ESSA LINHA QUANDO O CÓDIGO FOR PARA PRODUÇÃO
             end_date = start_date + timedelta(minutes=60)
                 
             if (run.hour >= 10) & (run.hour <= 16):
@@ -85,3 +86,38 @@ class PriceGetter:
             pass
 
         return final_df
+    
+
+class UploadData():
+
+    def __init__(self, price_getter = PriceGetter()):
+
+        self._data_to_upload = price_getter.get_new_data()
+
+
+    def upload_new_data(self):
+
+        data = self._data_to_upload
+
+        for _, row in data.iterrows():
+            datetime = row['datetime']
+            symbol = row['symbol']
+            
+            # Check if a record with the same datetime and symbol already exists
+            if not AssetPrice.objects.filter(datetime=datetime, symbol=symbol).exists():
+                print("Data is being uploaded")
+                # Create a new instance of AssetPrice and save it to the database
+                asset_price = AssetPrice(
+                    datetime=datetime,
+                    symbol=symbol,
+                    open=row['open'],
+                    high=row['high'],
+                    low=row['low'],
+                    close=row['close'],
+                    adj_close=row['adj_close'],
+                    volume=row['volume'],
+                    run=row['run']
+                )
+                asset_price.save()
+            else:
+                print("There is not new data to upload")

@@ -3,7 +3,7 @@
 from django.test import TestCase
 from datetime import datetime, timedelta
 from get_and_update_data.models import AssetPrice
-from get_and_update_data.get_data import PriceGetter
+from get_and_update_data.get_and_upload_data import PriceGetter, UploadData
 import pandas as pd
 
 class PriceGetterTestCase(TestCase):
@@ -13,6 +13,7 @@ class PriceGetterTestCase(TestCase):
         # Create some AssetPrice objects for testing
         AssetPrice.objects.create(symbol='PETR4.SA', datetime=datetime.now(), open=100.0, high=105.0, low=99.0, close=102.0, adj_close=101.0, volume=100000, run=datetime.now())
         AssetPrice.objects.create(symbol='CMIG4.SA', datetime=datetime.now(), open=200.0, high=205.0, low=199.0, close=202.0, adj_close=201.0, volume=200000, run=datetime.now() - timedelta(minutes=70))
+        AssetPrice.objects.create(symbol='PETR4.SA', datetime=datetime.now(), open=100.0, high=105.0, low=99.0, close=102.0, adj_close=101.0, volume=100000, run=datetime.now())
     
     def test_get_new_data(self):
         # Test the get_new_data method of PriceGetter
@@ -25,7 +26,6 @@ class PriceGetterTestCase(TestCase):
 
         # Check if new_data is a pandas DataFrame
         self.assertIsInstance(new_data, pd.DataFrame)
-        
         
         # Assert that the new_data DataFrame has the expected columns
         expected_columns = ['datetime', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'run', 'symbol']
@@ -45,3 +45,22 @@ class PriceGetterTestCase(TestCase):
         
         # Clean up any created data after the test (if necessary)
         AssetPrice.objects.all().delete()
+
+class DataUploadTestCase(TestCase):
+
+
+    def test_upload_new_data(self):
+
+        data_uploader = UploadData()
+        data_uploader.upload_new_data()
+        new_data = data_uploader._data_to_upload
+
+        uploaded_data = AssetPrice.objects.all()
+        self.assertEqual(len(uploaded_data), len(new_data))
+
+        for _, data in new_data.iterrows():
+            self.assertEqual(AssetPrice.objects.filter(datetime=data['datetime'], symbol=data['symbol']).count(), 1)
+
+
+    
+
