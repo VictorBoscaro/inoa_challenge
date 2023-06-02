@@ -2,13 +2,24 @@
 <html>
 <head>
     <title>Home Page</title>
-    {{ form.media }}
 </head>
 <body>
     <h1>Home Page</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form.media }}
+        <div>
+            <label for="{{ form.company.id_for_label }}">{{ form.company.label }}</label>
+            {{ form.company }}
+        </div>
+        <div>
+            <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}</label>
+            {{ form.start_date }}
+        </div>
+        <div>
+            <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}</label>
+            {{ form.end_date }}
+        </div>
         <button type="submit">Submit</button>
     </form>
 </body>
