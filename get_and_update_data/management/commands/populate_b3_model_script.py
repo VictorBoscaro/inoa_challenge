@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from get_and_update_data.models import B3Companie, AssetPrice
-from get_and_update_data.get_and_upload_data import UploadData
+from get_and_update_data.entities.get_and_upload_data import UploadData
 import pandas as pd
 from datetime import datetime
 import yfinance as yf

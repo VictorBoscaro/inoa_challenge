@@ -19,8 +19,11 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('get_and_update_data.urls')),
+    # path('asset-prices/', asset_prices, name='asset_prices'),
 ] 
 
 urlpatters = urlpatterns + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

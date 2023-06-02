@@ -3,7 +3,7 @@
 from django.test import TestCase
 from datetime import datetime, timedelta
 from get_and_update_data.models import AssetPrice
-from get_and_update_data.get_and_upload_data import PriceGetter, UploadData
+from get_and_update_data.entities.get_and_upload_data import PriceGetter, UploadData
 import pandas as pd
 
 import os
