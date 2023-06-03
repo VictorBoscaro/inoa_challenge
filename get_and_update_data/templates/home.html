@@ -2,6 +2,14 @@
 <html>
 <head>
     <title>Home Page</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        function plotChart(jsonData) {
+            var figureData = JSON.parse(jsonData).data;
+            var figureLayout = JSON.parse(jsonData).layout;
+            Plotly.newPlot('plot1', figureData, figureLayout);
+        }
+    </script>
 </head>
 <body>
     <h1>Home Page</h1>
@@ -22,5 +30,14 @@
         </div>
         <button type="submit">Submit</button>
     </form>
+    
+    <div id="plot1"></div>
+    
+    {% if plot_image %}
+        <script>
+            console.log("Calling plotChart function");
+            plotChart('{{ plot_image|escapejs }}');
+        </script>
+    {% endif %}
 </body>
 </html>
