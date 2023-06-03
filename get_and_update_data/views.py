@@ -2,12 +2,13 @@ import plotly.graph_objects as go
 from django.shortcuts import render
 from django.views.generic import View
 from get_and_update_data.models import AssetPrice, B3Companie
-import plotly.express as px
 from .forms import CompanyForm
+from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
 
 # Create your views here.
 
 class HomeView(View):
+
     def get(self, request):
         form = CompanyForm()
         return render(request, 'home.html', {'form': form})
@@ -20,6 +21,21 @@ class HomeView(View):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             # Perform further actions with the form data
+            data_retriever = DataRetriever(company, start_date, end_date)
+            dates, prices = data_retriever.retrieve_data()
+
+            line_chart = LineChart(
+                dates, 
+                prices, 
+                f"Preços do ativo {company} de {start_date} até {end_date}",
+                "Data",
+                "Preço"
+            )
+            
+            json_fig = line_chart.plot_to_json()
+
+            return render(request, 'home.html', {'form': form, 'plot_image': json_fig})
+
         return render(request, 'home.html', {'form': form})
 
 
@@ -38,15 +54,5 @@ class AssetPricesView(View):
         prices = [price.price for price in asset_prices]
 
         b3_companies = list(B3Companie().objects.values_list('symbol', flat=True).distinct())
-        
-        # Generate the chart using Plotly
-        fig = px.line(
-            x = timestamps,
-            y = prices
-        )
 
-        fig.update_layout(title='Asset Prices', xaxis_title='Datetime', yaxis_title='Price')
-        
-        json_fig = fig.to_json()
-        
-        return render(request, 'asset_prices.html', {'json_fig': json_fig, 'b3_companies': b3_companies})
+        return render(request, 'asset_prices.html', {'b3_companies': b3_companies})
