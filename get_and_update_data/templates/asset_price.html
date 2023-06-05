@@ -13,6 +13,32 @@
 </head>
 <body>
     <h1>Home Page</h1>
+    
+    {% if assets %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Asset Symbol</th>
+                    <th>Purchase Date</th>
+                    <th>Purchase Price</th>
+                    <th>Current Price</th>
+                    <th>Gain/Loss</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asset in assets %}
+                    <tr>
+                        <td>{{ asset.symbol }}</td>
+                        <td>{{ asset.date }}</td>
+                        <td>{{ asset.price }}</td>
+                        <td>{{ asset.current_price }}</td>
+                        <td>{{ asset.gain_loss }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    
     <form method="post">
         {% csrf_token %}
         {{ form.media }}

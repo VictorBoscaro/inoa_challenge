@@ -49,6 +49,7 @@ class StockPortfolio(models.Model):
     date = models.DateField()
     email = models.EmailField(null=True)
     username = models.CharField(max_length=150, null=True)
+    sold = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.symbol} - {self.date}"

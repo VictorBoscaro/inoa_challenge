@@ -3,11 +3,11 @@ from django.views.generic import View
 from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm
 from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
 from django.views.generic import FormView
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from datetime import datetime
+from .models import StockPortfolio, AssetPrice
 
 class HomeView(FormView):
     template_name = 'home.html'
@@ -69,7 +69,17 @@ class AssetView(View):
 
     def get(self, request):
         form = CompanyForm()
-        return render(request, 'asset_price.html', {'form': form})
+        assets = StockPortfolio.objects.filter(username=request.user, sold=False)
+
+        for asset in assets:
+            last_data_point = AssetPrice.objects.filter(symbol=asset.symbol, granularity='1d').order_by('-datetime').first()
+            if last_data_point:
+                asset.current_price = round(last_data_point.close, 2)
+                asset.gain_loss = f"{round(((asset.current_price - asset.price)/asset.price), 2) * 100}%"
+            else:
+                asset.current_price = None
+                asset.gain_loss = None
+        return render(request, 'asset_price.html', {'form': form, 'assets':assets})
 
     def post(self, request):
         form = CompanyForm(request.POST)
@@ -110,7 +120,6 @@ class AddStockView(LoginRequiredMixin, View):
         form = StockPortfolioForm(request.POST)
         if form.is_valid():
             stock = form.save(commit=False)
-            stock.date = datetime.now().date()
             stock.email = request.user.email
             stock.username = request.user.username
             stock.save()
