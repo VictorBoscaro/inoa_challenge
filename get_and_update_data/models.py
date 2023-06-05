@@ -2,7 +2,6 @@ from django.db import models
 
 class AssetPrice(models.Model):
     
-    
     datetime = models.DateTimeField()
     open = models.DecimalField(max_digits=10, decimal_places=2)
     high = models.DecimalField(max_digits=10, decimal_places=2)
@@ -34,3 +33,21 @@ class B3Companie(models.Model):
 
     def __str__(self):
         return self.symbol + "_" + self.run.strftime("%Y-%m-%d")
+    
+from django.contrib.auth.models import User
+
+class StockPortfolio(models.Model):
+    SYMBOL_CHOICES = B3Companie.objects
+
+    symbol = models.CharField(max_length=10, choices=SYMBOL_CHOICES)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(auto_now_add=True)
+    email = models.EmailField()
+    username = models.CharField(max_length=150)
+
+    def save(self, *args, **kwargs):
+        # Automatically fill the email and username fields with the user's information
+        if not self.pk and self.user:
+            self.email = self.user.email
+            self.username = self.user.username
+        super().save(*args, **kwargs)
