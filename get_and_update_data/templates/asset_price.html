@@ -28,6 +28,14 @@
             <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}</label>
             {{ form.end_date }}
         </div>
+        <div>
+            <label for="{{ form.granularity.id_for_label }}">{{ form.granularity.label }}</label>
+            {{ form.granularity }}
+        </div> 
+        <div>
+            <label for="{{ form.moving_average.id_for_label }}">{{ form.moving_average.label }}</label>
+            {{ form.moving_average }}
+        </div>    
         <button type="submit">Submit</button>
     </form>
 

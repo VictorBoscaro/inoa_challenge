@@ -4,19 +4,20 @@ from django.core.exceptions import PermissionDenied
 class AssetPrice(models.Model):
     
     datetime = models.DateTimeField()
-    open = models.DecimalField(max_digits=10, decimal_places=2)
-    high = models.DecimalField(max_digits=10, decimal_places=2)
-    low = models.DecimalField(max_digits=10, decimal_places=2)
-    close = models.DecimalField(max_digits=10, decimal_places=2)
-    adj_close = models.DecimalField(max_digits=10, decimal_places=2)
-    volume = models.DecimalField(max_digits=10, decimal_places=2)
+    open = models.DecimalField(max_digits=20, decimal_places=10)
+    high = models.DecimalField(max_digits=20, decimal_places=10)
+    low = models.DecimalField(max_digits=20, decimal_places=10)
+    close = models.DecimalField(max_digits=20, decimal_places=10)
+    adj_close = models.DecimalField(max_digits=20, decimal_places=10)
+    volume = models.DecimalField(max_digits=20, decimal_places=10)
     run = models.DateTimeField()
     symbol = models.CharField()
+    granularity = models.CharField(null=True)
 
     class Meta:
         db_table = 'assets_price'
         app_label = 'get_and_update_data'
-        unique_together = (('symbol', 'datetime'), )
+        unique_together = (('symbol', 'datetime', 'granularity'), )
 
     def __str__(self):
         return self.symbol + "_" + self.datetime.strftime("%Y-%m-%d %H:%m")

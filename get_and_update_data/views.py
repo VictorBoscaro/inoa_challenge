@@ -78,13 +78,17 @@ class AssetView(View):
             company = form.cleaned_data['company']
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
+            granularity = form.cleaned_data['granularity']
+            moving_average = form.cleaned_data['moving_average']
+
             # Perform further actions with the form data
-            data_retriever = DataRetriever(company, start_date, end_date)
+            data_retriever = DataRetriever(company, start_date, end_date, granularity)
             dates, prices = data_retriever.retrieve_data()
 
             line_chart = LineChart(
                 dates, 
                 prices, 
+                moving_average,
                 f"Preços do ativo {company} de {start_date} até {end_date}",
                 "Data",
                 "Preço"

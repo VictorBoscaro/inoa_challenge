@@ -91,49 +91,34 @@ else:
 #             self.assertEqual(AssetPrice.objects.filter(datetime=data['datetime'], symbol=data['symbol']).count(), 1)
 
 
-# class DataRetrieverTestCase(TestCase):
-#     def setUp(self):
-#         # Create some test data
-#         AssetPrice.objects.create(symbol='AAPL', datetime=datetime(2023, 1, 1), close=100, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='AAPL', datetime=datetime(2023, 1, 2), close=110, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='AAPL', datetime=datetime(2023, 1, 3), close=120, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='AAPL', datetime=datetime(2023, 1, 4), close=130, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='AAPL', datetime=datetime(2023, 1, 5), close=140, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
+class DataRetrieverTestCase:
 
-#         AssetPrice.objects.create(symbol='GOOGL', datetime=datetime(2023, 1, 1), close=2000, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='GOOGL', datetime=datetime(2023, 1, 2), close=2050, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='GOOGL', datetime=datetime(2023, 1, 3), close=2100, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='GOOGL', datetime=datetime(2023, 1, 4), close=2150, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
-#         AssetPrice.objects.create(symbol='GOOGL', datetime=datetime(2023, 1, 5), close=2200, open = 200, high = 200, low = 300, volume = 500, adj_close = 500, run = datetime(2023, 1, 1))
+    def __init__(self, symbol, start_date, end_date, granularity):
+        self.symbol = symbol
+        self.start_date = start_date
+        self.end_date = end_date
+        self.granularity = granularity
 
-#     def test_retrieve_data(self):
-#         # Create an instance of the DataRetriever class
-        
+    def test_retrieve_data(self):
 
-#         # Define the date range and symbol for testing
-#         start_date = '2023-01-03'
-#         end_date = '2023-05-22'
-#         symbol = 'AAPL'
-#         data_retriever = DataRetriever(symbol, start_date, end_date)
+        # Define the date range and symbol for testing
+  
+        data_retriever = DataRetriever(self.symbol, self.start_date, self.end_date, self.granularity)
 
-#         # Retrieve the data using the DataRetriever class
-#         dates, prices = data_retriever.retrieve_data()
-#         dates = [date.strftime("%Y-%m-%d") for date in dates]
-#         print(dates, prices)
-#         # Assert that the data is correct
-#         expected_prices = [120, 130, 140]
-#         expected_dates = ["2023-01-03", "2023-01-04", "2023-01-05"]
+        # Retrieve the data using the DataRetriever class
+        dates, prices = data_retriever.retrieve_data()
+        dates = [date.strftime("%Y-%m-%d") for date in dates]
+        print("Printing prices and dates:")
+        print(dates, prices)
+        # Assert that the data is correct
+        expected_prices = [120, 130, 140]
+        expected_dates = ["2023-01-03", "2023-01-04", "2023-01-05"]
 
-#         print('Asserting prices:')
-#         self.assertEqual(prices, expected_prices)
-#         print('Asserting dates:')
-#         self.assertEqual(dates, expected_dates)
+        print('Asserting prices:')
+        self.assertEqual(prices, expected_prices)
+        print('Asserting dates:')
+        self.assertEqual(dates, expected_dates)
 
 
-# def get_data_test():
-
-#     data_retriever = DataRetriever("LREN3.SA", "2023-05-29", "2023-05-31")
-#     dates, prices = data_retriever.retrieve_data()
-#     df = pd.DataFrame([dates, prices]).T
-#     df.columns = ['dates', 'prices']
-#     print(df.head(50))
+data_retriever_test = DataRetrieverTestCase("PETR4.SA", '2023-05-01', '2023-06-01', '60m')
+data_retriever_test.test_retrieve_data()

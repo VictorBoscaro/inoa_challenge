@@ -1,17 +1,28 @@
 from django import forms
-from .models import B3Companie, StockPortfolio
+from .models import B3Companie, StockPortfolio, AssetPrice
 from django.contrib.auth.models import Group, User
 
 class CompanyForm(forms.Form):
     company = forms.CharField(label="Ativo")
     start_date = forms.DateField(label="Data Inicial")
     end_date = forms.DateField(label="Data Final")
+    granularity = forms.CharField(label='Frequência')
+    moving_average = forms.IntegerField(label='Média Móvel')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        unique_values = B3Companie.objects.values_list('symbol', flat=True).distinct()
-        choices = [(value, value) for value in unique_values]
-        self.fields['company'].widget = forms.Select(choices=choices)
+
+        companies = B3Companie.objects.values_list('symbol', flat=True).distinct()
+        companies_unique = [(value, value) for value in companies]
+
+        granularities = AssetPrice.objects.values_list('granularity', flat=True).distinct()
+        granularities_unique = [(val, val) for val in granularities]
+
+        moving_average = [(int(val), int(val)) for val in [1, 3, 7, 14, 31]]
+
+        self.fields['company'].widget = forms.Select(choices=companies_unique)
+        self.fields['granularity'].widget = forms.Select(choices=granularities_unique)
+        self.fields['moving_average'].widget = forms.Select(choices=moving_average)
 
 class LoginForm(forms.Form):
     username = forms.CharField(label='Username')
