@@ -44,6 +44,15 @@ class RegistrationView(FormView):
         username = form.cleaned_data['username']
         password = form.cleaned_data['password']
         email = form.cleaned_data['email']
+
+        if User.objects.filter(email=email).exists():
+            form.add_error('email', 'This email is already registered.')
+            return self.form_invalid(form)
+
+        if User.objects.filter(username=username).exists():
+            form.add_error('username', 'This username is already registered.')
+            return self.form_invalid(form)
+
         User.objects.create_user(username=username, password=password, email=email)
         return redirect(self.success_url)
 

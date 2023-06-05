@@ -1,5 +1,7 @@
 import plotly.express as px
 from .models import AssetPrice
+import pandas as pd
+from datetime import timedelta
 
 class LineChart:
 
@@ -34,8 +36,8 @@ class DataRetriever:
 
         self.symbol = symbol
         self.start_date = start_date
-        self.end_date = end_date
-    
+        self.end_date = (pd.to_datetime(end_date) + timedelta(1)).strftime("%Y-%m-%d")
+
     def retrieve_data(self):
 
         asset_prices = AssetPrice.objects.filter(

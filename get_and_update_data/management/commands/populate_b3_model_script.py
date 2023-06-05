@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
         b3_companies = self.b3_companies
         start_date = pd.to_datetime("2023-04-01")
-        end_date = pd.to_datetime("2023-05-31")
+        end_date = pd.to_datetime("2023-06-05")
 
         final_df = self.get_new_data(start_date, end_date, b3_companies)
 
@@ -129,14 +129,59 @@ class UploadData:
                     run=row['run']
                 )
                 asset_price.save()
-                data_uploaded.append([row['datetime'], row['symbol'], row['open'], row['high'], row['close'], row['adj_close'], row['volume'], row['run']])
+                #data_uploaded.append([row['datetime'], row['symbol'], row['open'], row['high'], row['close'], row['adj_close'], row['volume'], row['run']])
             else:
                 print("There is not new data to upload")
         
-        return data_uploaded   
+        return data_uploaded
     
+class UpdateCompanies:
+
+    def __init__(self):
+        self.b3_companies = {
+                'RADL3.SA': 60,
+                'BBDC4.SA': 60,
+                'CMIG4.SA': 60,
+                'BBDC3.SA': 60,
+                'JBSS3.SA': 60,
+                'EQTL3.SA': 60,
+                'BBSE3.SA': 60,
+                'CCRO3.SA': 60,
+                'BRKM5.SA': 60,
+                'USIM5.SA': 60,
+                'MULT3.SA': 60,
+                'ITSA4.SA': 60,
+                'BBAS3.SA': 60,
+                'ENBR3.SA': 60,
+                'OIBR4.SA': 60,
+                'ECOR3.SA': 60,
+                'UGPA3.SA': 60,
+                'KLBN11.SA': 60,
+                'PETR3.SA': 60,
+                'SBSP3.SA': 60,
+                'LREN3.SA': 60,
+                'PETR4.SA': 60
+            }
+    
+    def handle(self):
+        for key, value in self.b3_companies.items():
+
+            if not B3Companie.objects.filter(symbol=key, minutes_update_rate=value).exists():
+                    
+                    # Create a new instance of AssetPrice and save it to the database
+                    companies = B3Companie(
+                        symbol = key,
+                        minutes_update_rate = value
+                    )
+
+                    companies.save()
+
 command = Command()
 command.handle()
 final_df = command.final_df
 upload_data = UploadData(final_df)
 upload_data.upload_new_data()
+
+
+# companies_update = UpdateCompanies()
+# companies_update.handle()
