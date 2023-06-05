@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from get_and_update_data.models import B3Companie, AssetPrice
 from get_and_update_data.entities.get_and_upload_data import UploadData
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import yfinance as yf
 import os
 
@@ -187,30 +187,89 @@ class UpdateCompanies:
 # companies_update.handle()
 
 
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import Permission
+granularity = """1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d"""
+granularities = list(map(lambda x: x.strip(), granularity.split(',')))
 
-# # Create the group
-# stock_group, _ = Group.objects.get_or_create(name='Stock Users')
 
-# # Get the permission
-# permission = Permission.objects.get(codename='add_stockportfolio')
+start_date = (datetime.today() - timedelta(30)).strftime("%Y-%m-%d")
+end_date = datetime.today().strftime('%Y-%m-%d')
+run = datetime.now()
 
-# # Assign the permission to the group
-# stock_group.permissions.add(permission)
+b3_companies = Command().b3_companies.keys()
 
-# from django.contrib.auth.models import User
+final_df = pd.DataFrame()
 
-# # Get the user
-# user = User.objects.get(username='algumacoisa')
+for company in b3_companies:
+    
+    print(company)
+    for granularity in granularities:
+        print(granularity)
+        if granularity == '1m':
+            date_range = pd.date_range(datetime.today() - timedelta(29), end_date, freq = '7D')
+            for date in date_range:
+                
+                from_date = (date).strftime("%Y-%m-%d")
+                to_date = (date + timedelta(7)).strftime("%Y-%m-%d")
+                
+                print(f"start_date: {from_date}, end_date: {to_date}")
+                data = yf.download(company, start = from_date, end = to_date, interval = granularity)
+                data['run'] = run
+                data['symbol'] = company
+                data['granularity'] = granularity
+                final_df = pd.concat([final_df, data], axis = 0)
+                
+        if granularity in ['60m', '90m', '1h', '1d']:
+            data = yf.download(company, start = start_date, end = end_date, interval = granularity)
+            data['run'] = run
+            data['symbol'] = company
+            data['granularity'] = granularity
+            final_df = pd.concat([final_df, data], axis = 0)
+        
+        else:
+            date_range = pd.date_range(datetime.today() - timedelta(59), end_date, freq = '60D')
+            for date in date_range:
+                from_date = (date).strftime("%Y-%m-%d")
+                to_date = (date + timedelta(60)).strftime("%Y-%m-%d")
+                
+                if (date + timedelta(60)) > datetime.today():
+                    to_date = datetime.today()
+                
+                data = yf.download(company, start = from_date, end = to_date, interval = granularity)
+                data['run'] = run
+                data['symbol'] = company
+                data['granularity'] = granularity
+                final_df = pd.concat([final_df, data], axis = 0)
 
-# # Assign the group to the user
-# user.groups.add(stock_group)
 
-group, created = Group.objects.get_or_create(name='StockPortfolio Writers')
+final_df = final_df.reset_index()
+final_df.columns = ['datetime', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'run', 'symbol', 'granularity']
+final_df['open'] = final_df.open.round(4)
+final_df['high'] = final_df.high.round(4)
+final_df['low'] = final_df.low.round(4)
+final_df['close'] = final_df.close.round(4)
+final_df['adj_close'] = final_df.adj_close.round(4)
+final_df['volume'] = final_df.volume.round(4)
+print(final_df.info())
 
-# Get the custom permission
-write_permission = Permission.objects.get(codename='write_stockportfolio')
-
-# Assign the permission to the group
-group.permissions.add(write_permission)
+for _, row in final_df.iterrows():
+    datetime = row['datetime']
+    granularity = row['granularity']
+    symbol = row['symbol']
+    print(datetime, symbol, granularity, row['open'], row['close'], row['low'], row['high'], row['adj_close'], row['volume'], row['run'])
+    
+    if not AssetPrice.objects.filter(datetime=datetime, symbol=symbol, granularity=granularity).exists():
+                
+                # Create a new instance of AssetPrice and save it to the database
+                asset_price = AssetPrice(
+                    datetime=datetime,
+                    symbol=symbol,
+                    open=row['open'],
+                    high=row['high'],
+                    low=row['low'],
+                    close=row['close'],
+                    adj_close=row['adj_close'],
+                    volume=row['volume'],
+                    run=row['run'],
+                    granularity=granularity
+                )
+                asset_price.save()
