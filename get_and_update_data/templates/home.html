@@ -2,42 +2,23 @@
 <html>
 <head>
     <title>Home Page</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script>
-        function plotChart(jsonData) {
-            var figureData = JSON.parse(jsonData).data;
-            var figureLayout = JSON.parse(jsonData).layout;
-            Plotly.newPlot('plot1', figureData, figureLayout);
-        }
-    </script>
 </head>
 <body>
-    <h1>Home Page</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.media }}
-        <div>
-            <label for="{{ form.company.id_for_label }}">{{ form.company.label }}</label>
-            {{ form.company }}
-        </div>
-        <div>
-            <label for="{{ form.start_date.id_for_label }}">{{ form.start_date.label }}</label>
-            {{ form.start_date }}
-        </div>
-        <div>
-            <label for="{{ form.end_date.id_for_label }}">{{ form.end_date.label }}</label>
-            {{ form.end_date }}
-        </div>
-        <button type="submit">Submit</button>
-    </form>
-    
-    <div id="plot1"></div>
-    
-    {% if plot_image %}
-        <script>
-            console.log("Calling plotChart function");
-            plotChart('{{ plot_image|escapejs }}');
-        </script>
-    {% endif %}
+    <h1>Welcome to the Home Page</h1>
+
+    <div>
+        <h2>Login</h2>
+        <form method="post" action="{% url 'home' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div>
+        <h2>Create an Account</h2>
+        <a href="{% url 'registration' %}">Register</a>
+    </div>
+
 </body>
 </html>

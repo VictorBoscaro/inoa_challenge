@@ -1,17 +1,57 @@
-import plotly.graph_objects as go
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from get_and_update_data.models import AssetPrice, B3Companie
-from .forms import CompanyForm
+from .forms import CompanyForm, LoginForm, RegistrationForm
 from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
+from django.views.generic import FormView
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate
 
-# Create your views here.
+class HomeView(FormView):
+    template_name = 'home.html'
+    form_class = LoginForm
+    success_url = '/asset_price/'
 
-class HomeView(View):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['registration_form'] = RegistrationForm()
+        return context
+
+    def form_valid(self, form):
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        user = authenticate(self.request, username=username, password=password)
+        if user is not None:
+            login(self.request, user)
+            return redirect(self.success_url)
+        else:
+            form.add_error(None, 'Invalid username or password')
+            context = self.get_context_data(form=form)
+            return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        if 'register' in request.POST:
+            return redirect('registration')
+        return super().post(request, *args, **kwargs)
+
+class RegistrationView(FormView):
+    template_name = 'registration.html'
+    form_class = RegistrationForm
+    success_url = '/'
+
+    def form_valid(self, form):
+        username = form.cleaned_data['username']
+        password = form.cleaned_data['password']
+        email = form.cleaned_data['email']
+        User.objects.create_user(username=username, password=password, email=email)
+        return redirect(self.success_url)
+
+class AssetView(View):
 
     def get(self, request):
         form = CompanyForm()
-        return render(request, 'home.html', {'form': form})
+        return render(request, 'asset_price.html', {'form': form})
 
     def post(self, request):
         form = CompanyForm(request.POST)
@@ -34,25 +74,6 @@ class HomeView(View):
             
             json_fig = line_chart.plot_to_json()
 
-            return render(request, 'home.html', {'form': form, 'plot_image': json_fig})
+            return render(request, 'asset_price.html', {'form': form, 'plot_image': json_fig})
 
-        return render(request, 'home.html', {'form': form})
-
-
-class AssetPricesView(View):
-
-    template_name = 'asset_price.html'
-    def get(self, request):
-        return render(request, 'asset_prices.html')
-    
-    def post(self, request):
-        asset_name = request.POST.get('asset_name')
-        asset_prices = AssetPrice.objects.filter(asset_name=asset_name).order_by('datetime')
-        
-        # Retrieve timestamps and prices from the queryset
-        timestamps = [price.timestamp for price in asset_prices]
-        prices = [price.price for price in asset_prices]
-
-        b3_companies = list(B3Companie().objects.values_list('symbol', flat=True).distinct())
-
-        return render(request, 'asset_prices.html', {'b3_companies': b3_companies})
+        return render(request, 'asset_price.html', {'form': form})
