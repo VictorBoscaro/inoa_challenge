@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
-from get_and_update_data.models import AssetPrice, B3Companie
-from .forms import CompanyForm, LoginForm, RegistrationForm
+from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm
 from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
 from django.views.generic import FormView
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.mixins import LoginRequiredMixin
+from datetime import datetime
 
 class HomeView(FormView):
     template_name = 'home.html'
@@ -35,6 +36,8 @@ class HomeView(FormView):
             return redirect('registration')
         return super().post(request, *args, **kwargs)
 
+from django.contrib.auth.models import Group
+
 class RegistrationView(FormView):
     template_name = 'registration.html'
     form_class = RegistrationForm
@@ -53,8 +56,14 @@ class RegistrationView(FormView):
             form.add_error('username', 'This username is already registered.')
             return self.form_invalid(form)
 
-        User.objects.create_user(username=username, password=password, email=email)
+        user = User.objects.create_user(username=username, password=password, email=email)
+
+        # Assign the user to the desired group
+        group = Group.objects.get(name='StockPortfolio Writers')  # Replace 'your_group_name' with the actual group name
+        group.user_set.add(user)
+
         return redirect(self.success_url)
+
 
 class AssetView(View):
 
@@ -86,3 +95,20 @@ class AssetView(View):
             return render(request, 'asset_price.html', {'form': form, 'plot_image': json_fig})
 
         return render(request, 'asset_price.html', {'form': form})
+
+class AddStockView(LoginRequiredMixin, View):
+
+    def get(self, request):
+        form = StockPortfolioForm()
+        return render(request, 'add_stock.html', {'form': form})
+
+    def post(self, request):
+        form = StockPortfolioForm(request.POST)
+        if form.is_valid():
+            stock = form.save(commit=False)
+            stock.date = datetime.now().date()
+            stock.email = request.user.email
+            stock.username = request.user.username
+            stock.save()
+            return redirect('asset')
+        return render(request, 'add_stock.html', {'form': form})
