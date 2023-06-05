@@ -176,12 +176,41 @@ class UpdateCompanies:
 
                     companies.save()
 
-command = Command()
-command.handle()
-final_df = command.final_df
-upload_data = UploadData(final_df)
-upload_data.upload_new_data()
+# command = Command()
+# command.handle()
+# final_df = command.final_df
+# upload_data = UploadData(final_df)
+# upload_data.upload_new_data()
 
 
 # companies_update = UpdateCompanies()
 # companies_update.handle()
+
+
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import Permission
+
+# # Create the group
+# stock_group, _ = Group.objects.get_or_create(name='Stock Users')
+
+# # Get the permission
+# permission = Permission.objects.get(codename='add_stockportfolio')
+
+# # Assign the permission to the group
+# stock_group.permissions.add(permission)
+
+# from django.contrib.auth.models import User
+
+# # Get the user
+# user = User.objects.get(username='algumacoisa')
+
+# # Assign the group to the user
+# user.groups.add(stock_group)
+
+group, created = Group.objects.get_or_create(name='StockPortfolio Writers')
+
+# Get the custom permission
+write_permission = Permission.objects.get(codename='write_stockportfolio')
+
+# Assign the permission to the group
+group.permissions.add(write_permission)
