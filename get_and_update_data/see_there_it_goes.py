@@ -25,14 +25,8 @@ class LineChart:
     def make_plot(self):
         
         if self.ma != 1:
-            print('moving_average')
-            print(type(self.ma), self.ma)
-            print(self.y_values)            
+                       
             self.y_values = self.moving_average(self.y_values, self.ma)
-        
-        else:
-            
-            print('not moving average')
 
         fig = px.line(x=self.x_values, y = self.y_values)
 

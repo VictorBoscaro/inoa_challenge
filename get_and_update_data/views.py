@@ -1,13 +1,19 @@
 from django.shortcuts import render, redirect, reverse
-from django.views.generic import View
-from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm
+from django.views.generic import View, FormView
+from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm, UpdateStockForm
 from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
-from django.views.generic import FormView
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from datetime import datetime
 from .models import StockPortfolio, AssetPrice
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.core.exceptions import ObjectDoesNotExist
+import json
+from django.urls import reverse_lazy
+from django.views.generic.edit import UpdateView
+from django.shortcuts import get_object_or_404
 
 class HomeView(FormView):
     template_name = 'home.html'
@@ -64,12 +70,11 @@ class RegistrationView(FormView):
 
         return redirect(self.success_url)
 
-
 class AssetView(View):
 
     def get(self, request):
         form = CompanyForm()
-        assets = StockPortfolio.objects.filter(username=request.user, sold=False)
+        assets = StockPortfolio.objects.filter(username=request.user, sold_date__isnull=True)
 
         for asset in assets:
             last_data_point = AssetPrice.objects.filter(symbol=asset.symbol, granularity='1d').order_by('-datetime').first()
@@ -123,5 +128,28 @@ class AddStockView(LoginRequiredMixin, View):
             stock.email = request.user.email
             stock.username = request.user.username
             stock.save()
-            return redirect('asset')
+            return redirect('asset_price')
         return render(request, 'add_stock.html', {'form': form})
+
+class StockUpdateView(LoginRequiredMixin, View):
+    def get(self, request):
+        form = UpdateStockForm()
+        return render(request, 'update_stock.html', {'form': form})
+
+    def post(self, request):
+        form = UpdateStockForm(request.POST)
+        if form.is_valid():
+            symbol = form.cleaned_data['symbol']
+            date = form.cleaned_data['date']
+            sold_date = form.cleaned_data['sold_date']
+            sold_price = form.cleaned_data['sold_price']
+            username = request.user.username
+
+            stock = get_object_or_404(StockPortfolio, symbol=symbol, date=date, username=username)
+            stock.sold_date = sold_date
+            stock.sold_price = sold_price
+            stock.save()
+
+            return redirect('asset')
+
+        return render(request, 'update_stock.html', {'form': form})

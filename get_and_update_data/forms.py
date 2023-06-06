@@ -61,3 +61,9 @@ class StockPortfolioForm(forms.ModelForm):
     class Meta:
         model = StockPortfolio
         fields = ('symbol', 'price', 'date')
+
+
+class UpdateStockForm(forms.ModelForm):
+    class Meta:
+        model = StockPortfolio
+        fields = ('symbol', 'date', 'sold_date', 'sold_price')

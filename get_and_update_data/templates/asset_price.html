@@ -9,6 +9,39 @@
             var figureLayout = JSON.parse(jsonData).layout;
             Plotly.newPlot('plot1', figureData, figureLayout);
         }
+
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        function updateStock(id) {
+            console.log(id);
+            let isChecked = document.querySelector(`input[name="sold"][value="${id}"]`).checked;
+
+            fetch(`/update_asset/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ sold: isChecked }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Update successful');
+                } else {
+                    alert('Update failed');
+                }
+            });
+        }
+
+        window.onload = function() {
+            var buttons = document.querySelectorAll('.update-button');
+            buttons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    updateStock(this.dataset.assetId);
+                });
+            });
+        }
     </script>
 </head>
 <body>
@@ -23,6 +56,7 @@
                     <th>Purchase Price</th>
                     <th>Current Price</th>
                     <th>Gain/Loss</th>
+                    <th>Sold</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,12 +67,6 @@
                         <td>{{ asset.price }}</td>
                         <td>{{ asset.current_price }}</td>
                         <td>{{ asset.gain_loss }}</td>
-                        <td>
-                            <input type="checkbox" name="sold" value="{{ asset.id }}" {% if asset.sold %}checked{% endif %}>
-                        </td>
-                        <td>
-                            <button onclick="updateStock('{{ asset.id }}')">Update</button>
-                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -73,6 +101,10 @@
 
     <div>
         <a href="{% url 'add_stock' %}" class="btn btn-primary">Adicionar Ativo ao Portifólio</a>
+    </div>
+
+    <div>
+        <td><a href="{% url 'update_stock' %}">Atualizar Ativo no Portifólio</a></td>
     </div>
     
     <div id="plot1"></div>
