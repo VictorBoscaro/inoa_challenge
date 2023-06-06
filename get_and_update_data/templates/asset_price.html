@@ -33,6 +33,12 @@
                         <td>{{ asset.price }}</td>
                         <td>{{ asset.current_price }}</td>
                         <td>{{ asset.gain_loss }}</td>
+                        <td>
+                            <input type="checkbox" name="sold" value="{{ asset.id }}" {% if asset.sold %}checked{% endif %}>
+                        </td>
+                        <td>
+                            <button onclick="updateStock('{{ asset.id }}')">Update</button>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
