@@ -2,11 +2,13 @@
 
 from django.test import TestCase
 from datetime import datetime, timedelta
-from get_and_update_data.models import AssetPrice
+from get_and_update_data.models import AssetPrice, StockPortfolio
 from get_and_update_data.entities.get_and_upload_data import PriceGetter, UploadData
+from .views import EmailSelector
 import pandas as pd
 from get_and_update_data.see_there_it_goes import DataRetriever
 from datetime import datetime
+from django.contrib.auth.models import User
 
 import os
 
@@ -91,34 +93,56 @@ else:
 #             self.assertEqual(AssetPrice.objects.filter(datetime=data['datetime'], symbol=data['symbol']).count(), 1)
 
 
-class DataRetrieverTestCase:
+# class DataRetrieverTestCase:
 
-    def __init__(self, symbol, start_date, end_date, granularity):
-        self.symbol = symbol
-        self.start_date = start_date
-        self.end_date = end_date
-        self.granularity = granularity
+#     def __init__(self, symbol, start_date, end_date, granularity):
+#         self.symbol = symbol
+#         self.start_date = start_date
+#         self.end_date = end_date
+#         self.granularity = granularity
 
-    def test_retrieve_data(self):
+#     def test_retrieve_data(self):
 
-        # Define the date range and symbol for testing
+#         # Define the date range and symbol for testing
   
-        data_retriever = DataRetriever(self.symbol, self.start_date, self.end_date, self.granularity)
+#         data_retriever = DataRetriever(self.symbol, self.start_date, self.end_date, self.granularity)
 
-        # Retrieve the data using the DataRetriever class
-        dates, prices = data_retriever.retrieve_data()
-        dates = [date.strftime("%Y-%m-%d") for date in dates]
-        print("Printing prices and dates:")
-        print(dates, prices)
-        # Assert that the data is correct
-        expected_prices = [120, 130, 140]
-        expected_dates = ["2023-01-03", "2023-01-04", "2023-01-05"]
+#         # Retrieve the data using the DataRetriever class
+#         dates, prices = data_retriever.retrieve_data()
+#         dates = [date.strftime("%Y-%m-%d") for date in dates]
+#         print("Printing prices and dates:")
+#         print(dates, prices)
+#         # Assert that the data is correct
+#         expected_prices = [120, 130, 140]
+#         expected_dates = ["2023-01-03", "2023-01-04", "2023-01-05"]
 
-        print('Asserting prices:')
-        self.assertEqual(prices, expected_prices)
-        print('Asserting dates:')
-        self.assertEqual(dates, expected_dates)
+#         print('Asserting prices:')
+#         self.assertEqual(prices, expected_prices)
+#         print('Asserting dates:')
+#         self.assertEqual(dates, expected_dates)
 
+def email_selector_purchase_test():
+    # print('email selector test')
+    purchase_users = EmailSelector().purchase_email()
+    # print(purchase_users)
+    all_email = User.objects.values_list('email', flat=True).distinct()
+    all_email = [email for email in all_email]
 
-data_retriever_test = DataRetrieverTestCase("PETR4.SA", '2023-05-01', '2023-06-01', '60m')
-data_retriever_test.test_retrieve_data()
+    if all_email == purchase_users:
+        print('Os emails são iguais')
+    else:
+        print('Os emails não são iguais')
+
+def email_select_sell_test(symbol):
+    sell_email = EmailSelector(symbol).sell_email()
+    print("sell email")
+    print(sell_email)
+    symbol_email = StockPortfolio.objects.filter(symbol=symbol, sold_date__isnull=True).values_list('email', flat=True).distinct()
+    symbol_email = [email for email in symbol_email]
+    print('symbol email')
+    print(symbol_email)
+    if sell_email == symbol_email:
+        print('Os emails são iguais')
+    else:
+        print('Os emails não são iguais')
+

@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import PermissionDenied
+from datetime import datetime
 
 class AssetPrice(models.Model):
     
@@ -35,9 +36,6 @@ class B3Companie(models.Model):
 
     def __str__(self):
         return self.symbol + "_" + self.run.strftime("%Y-%m-%d")
-    
-from django.contrib.auth.models import User
-from datetime import datetime
 
 class StockPortfolio(models.Model):
 

@@ -1,7 +1,45 @@
-<h1>Update Stock</h1>
+{% load static %}
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Update</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Stock</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Update Stock</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <p>Symbol: {{ form.symbol }}</p>
+        <p>Date: {{ form.date }}</p>  <!-- Render date field -->
+        <p>{{ form.sold_date }}</p>
+        <p>{{ form.sold_price }}</p>
+        <button type="submit">Update</button>
+    </form>
+
+    <script>
+    $(document).ready(function() {
+        $('#id_symbol').change(function() {
+            var symbol = $(this).val();
+            if (symbol) {
+                $.ajax({
+                    url: "{% url 'get_dates' %}",
+                    data: {
+                        'symbol': symbol
+                    },
+                    success: function(data) {
+                        console.log(data)
+                        var select = $('#id_date');
+                        select.empty();
+                        $.each(data.dates_list, function(index, value) {
+                            select.append('<option value="'+ value +'">'+ value +'</option>');
+                        });
+                    }
+                });
+            }
+        });
+    });
+    </script>
+</body>
+</html>

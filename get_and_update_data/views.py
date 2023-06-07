@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect
 from django.views.generic import View, FormView
 from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm, UpdateStockForm
 from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
@@ -6,14 +6,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import StockPortfolio, AssetPrice
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from django.core.exceptions import ObjectDoesNotExist
-import json
-from django.urls import reverse_lazy
-from django.views.generic.edit import UpdateView
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from django_pandas.io import read_frame
+from django.http import JsonResponse
 
 class HomeView(FormView):
     template_name = 'home.html'
@@ -128,7 +124,7 @@ class AddStockView(LoginRequiredMixin, View):
             stock.email = request.user.email
             stock.username = request.user.username
             stock.save()
-            return redirect('asset_price')
+            return redirect('asset')
         return render(request, 'add_stock.html', {'form': form})
 
 class StockUpdateView(LoginRequiredMixin, View):
@@ -153,3 +149,71 @@ class StockUpdateView(LoginRequiredMixin, View):
             return redirect('asset')
 
         return render(request, 'update_stock.html', {'form': form})
+    
+
+class EmailSelector:
+
+    def __init__(self, symbol = None):
+
+        self.symbol = symbol
+
+    def purchase_email(self, model = User):
+        
+        all_email = model.objects.values_list('email', flat=True).distinct()
+        all_email = [email for email in all_email]
+        return all_email
+    
+    def sell_email(self, model = StockPortfolio):
+        if self.symbol == None:
+            raise ValueError("Insert a symbol when instantiting the class")
+        else:
+            users_with_stock = model.objects.filter(symbol = self.symbol).values_list('email', flat=True).distinct()
+            users_with_stock = [email for email in users_with_stock]
+            return users_with_stock
+
+class EmailSendingView(View):
+
+    def __init__(self, subject, message, email_list, from_email = 'victorboscaro@gmail.com'):
+
+        self.subject = subject
+        self.message = message
+        self.from_email = from_email
+        self.email_list = email_list
+
+    def send_email_to_user(self):
+        
+        send_mail(self.subject, self.message, self.from_email, self.email_list)
+
+class RecommendationRule:
+
+    def __init__(self, users_model = StockPortfolio, asset_model = AssetPrice):
+
+        self.users_model = users_model
+        self.asset_model = asset_model
+
+    def purchase_rule(self):
+
+        model_data = self.asset_model.objects.filter(granularity='1d').all()
+        model_data_df = read_frame(model_data)
+
+class GetDatesView(View):
+
+    def get(self, request, *args, **kwargs):
+        symbol = request.GET.get('symbol', None)
+        user_email = request.user.email
+        dates = StockPortfolio.objects.filter(symbol=symbol, email=user_email).values_list('date', flat=True)
+        if dates:    
+            date_list = [date.strftime("%Y-%m-%d") for date in dates]
+            
+            data = {
+                "is_taken": True,
+                "dates_list": date_list
+            }
+            return JsonResponse(data)
+        
+        else:
+            data = {
+                "is_taken": False,
+            }
+            return JsonResponse(data)
+        
