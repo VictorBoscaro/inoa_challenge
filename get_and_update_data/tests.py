@@ -4,7 +4,7 @@ from django.test import TestCase
 from datetime import datetime, timedelta
 from get_and_update_data.models import AssetPrice, StockPortfolio
 from get_and_update_data.entities.get_and_upload_data import PriceGetter, UploadData
-from .views import EmailSelector
+from .views import EmailSelector, RecommendationRule
 import pandas as pd
 from get_and_update_data.see_there_it_goes import DataRetriever
 from datetime import datetime
@@ -146,3 +146,7 @@ def email_select_sell_test(symbol):
     else:
         print('Os emails não são iguais')
 
+
+test = RecommendationRule()
+rec = test.purchase_rule(28, -0.05)
+print(rec)
