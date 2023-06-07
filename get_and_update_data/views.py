@@ -10,6 +10,8 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django_pandas.io import read_frame
 from django.http import JsonResponse
+from datetime import timedelta, datetime
+import pandas as pd
 
 class HomeView(FormView):
     template_name = 'home.html'
@@ -186,16 +188,31 @@ class EmailSendingView(View):
 
 class RecommendationRule:
 
+    LAST_60_DAYS = datetime.today() - timedelta(60)
+
     def __init__(self, users_model = StockPortfolio, asset_model = AssetPrice):
 
         self.users_model = users_model
         self.asset_model = asset_model
 
-    def purchase_rule(self):
+    def purchase_rule(self, moving_average, var_threshold, last_days = LAST_60_DAYS):
 
-        model_data = self.asset_model.objects.filter(granularity='1d').all()
+        model_data = self.asset_model.objects.filter(granularity='1d', datetime__gte=last_days).all()
         model_data_df = read_frame(model_data)
+        model_data_df['datetime'] = model_data_df.datetime.apply(lambda x: x.replace(tzinfo=None))
+        model_data_df['moving_average'] = model_data_df.groupby('symbol')['close'].\
+            transform(lambda x: x.rolling(window=moving_average).mean())
+        
+        last_moving_average = model_data_df[(model_data_df['datetime'] < model_data_df['datetime'].max())].groupby('symbol')['moving_average'].last()
 
+        last_price = model_data_df.groupby('symbol').close.last()
+        comp_df = pd.merge(left = last_price, right = last_moving_average, left_index = True, right_index = True)
+        comp_df['close'] = comp_df['close'].astype(float)
+        comp_df['variation'] = (comp_df['close'] - comp_df['moving_average'])/comp_df['moving_average']
+        recommendation = comp_df[comp_df['variation'] <= var_threshold]
+        
+        return recommendation.index
+        
 class GetDatesView(View):
 
     def get(self, request, *args, **kwargs):
@@ -204,7 +221,7 @@ class GetDatesView(View):
         dates = StockPortfolio.objects.filter(symbol=symbol, email=user_email).values_list('date', flat=True)
         if dates:    
             date_list = [date.strftime("%Y-%m-%d") for date in dates]
-            
+
             data = {
                 "is_taken": True,
                 "dates_list": date_list
