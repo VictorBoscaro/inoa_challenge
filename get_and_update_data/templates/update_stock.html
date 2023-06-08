@@ -13,8 +13,8 @@
         {% csrf_token %}
         <p>Symbol: {{ form.symbol }}</p>
         <p>Date: {{ form.date }}</p>  <!-- Render date field -->
-        <p>{{ form.sold_date }}</p>
-        <p>{{ form.sold_price }}</p>
+        <p>Sold Date: {{ form.sold_date }}</p>
+        <p>Sold Price: {{ form.sold_price }}</p>
         <button type="submit">Update</button>
     </form>
 
