@@ -9,7 +9,9 @@ import pandas as pd
 from get_and_update_data.see_there_it_goes import DataRetriever
 from datetime import datetime
 from django.contrib.auth.models import User
-
+from .models import AssetPrice
+import datetime
+from decimal import Decimal
 import os
 
 if "DJANGO_SETTINGS_MODULE" in os.environ:
@@ -146,7 +148,48 @@ def email_select_sell_test(symbol):
     else:
         print('Os emails não são iguais')
 
+class TestPurchaseRecommendationRule(TestCase):
 
-test = RecommendationRule()
-rec = test.purchase_rule(28, -0.05)
-print(rec)
+    @classmethod
+    def setUpTestData(cls):
+        now = datetime.datetime.now()
+        base_price = Decimal('100.0')
+        for i in range(60):
+            date = now - datetime.timedelta(days=60-i)
+            if i >= 55:
+                base_price = base_price * Decimal('0.97') # 1% decrease each day for last 5 days
+            AssetPrice.objects.create(datetime=date, open=base_price, high=base_price, low=base_price,
+                                      close=base_price, adj_close=base_price, volume=Decimal('10000'),
+                                      run=now, symbol='AAPL', granularity='1d')
+    
+    def test_purchase_rule(self):
+        print('Testing purchase rule')
+        rule = RecommendationRule(asset_model=AssetPrice)
+        result = rule.purchase_rule(moving_average=5, var_threshold=-0.05)  # using negative var_threshold as the price is lower than the moving average
+        self.assertIn('AAPL', result)
+
+class TestSellRecommendationRule(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        now = datetime.datetime.now()
+        base_price = Decimal('100.0')
+        for i in range(60):
+            date = now - datetime.timedelta(days=60-i)
+            AssetPrice.objects.create(datetime=date, open=base_price, high=base_price, low=base_price,
+                                      close=base_price, adj_close=base_price, volume=Decimal('10000'),
+                                      run=now, symbol='AAPL', granularity='1d')
+
+        # Assuming users bought the stock 60 days ago
+        StockPortfolio.objects.create(symbol='AAPL', price=Decimal('90.0'), date=now-datetime.timedelta(days=60),
+                                      email='test_user@example.com', username='test_user')
+
+        # The stock price has increased by more than 10% (from 90 to 100)
+    
+    def test_sell_rule(self):
+        print('Testing sell rule')
+        rule = RecommendationRule()
+        result = rule.sell_rule(sell_threshold=0.1)  
+        self.assertEqual(len(result), 1)  # Expecting 1 stock to be sold
+        self.assertEqual(result.iloc[0]['email'], 'test_user@example.com')
+        self.assertEqual(result.iloc[0]['symbol'], 'AAPL')

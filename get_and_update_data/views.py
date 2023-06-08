@@ -211,7 +211,29 @@ class RecommendationRule:
         comp_df['variation'] = (comp_df['close'] - comp_df['moving_average'])/comp_df['moving_average']
         recommendation = comp_df[comp_df['variation'] <= var_threshold]
         
-        return recommendation.index
+        return list(recommendation.index)
+    
+    def sell_rule(self, sell_threshold = 0.1):
+
+        # Get all unsold stocks from the users' portfolios
+        portfolios = self.users_model.objects.filter(sold_date__isnull=True).all()
+        portfolios_df = pd.DataFrame(list(portfolios.values()))
+
+        # Get the latest asset prices
+        latest_prices = self.asset_model.objects.filter(granularity='1d').order_by('symbol', '-datetime').distinct('symbol')
+        latest_prices_df = pd.DataFrame(list(latest_prices.values()))
+
+        # Merge the two dataframes
+        comp_df = pd.merge(left = portfolios_df, right = latest_prices_df, left_on = 'symbol', right_on = 'symbol')
+
+        # Calculate the percentage change
+        comp_df['perc_change'] = (comp_df['close'].astype(float) - comp_df['price'].astype(float))/comp_df['price'].astype(float)
+        
+        # Check the sell condition
+        sell_recommendation = comp_df[comp_df['perc_change'] >= sell_threshold]
+
+        # Return the emails and symbols of the stocks to be sold
+        return sell_recommendation[['email', 'symbol']]
         
 class GetDatesView(View):
 
