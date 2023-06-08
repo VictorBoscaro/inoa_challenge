@@ -155,9 +155,9 @@ class StockUpdateView(LoginRequiredMixin, View):
 
 class EmailSelector:
 
-    def __init__(self, symbol = None):
+    # def __init__(self):
 
-        self.symbol = symbol
+    #     self.symbol = symbol
 
     def purchase_email(self, model = User):
         
@@ -165,13 +165,13 @@ class EmailSelector:
         all_email = [email for email in all_email]
         return all_email
     
-    def sell_email(self, model = StockPortfolio):
-        if self.symbol == None:
-            raise ValueError("Insert a symbol when instantiting the class")
-        else:
-            users_with_stock = model.objects.filter(symbol = self.symbol).values_list('email', flat=True).distinct()
-            users_with_stock = [email for email in users_with_stock]
-            return users_with_stock
+    # def sell_email(self, model = StockPortfolio):
+    #     if self.symbol == None:
+    #         raise ValueError("Insert a symbol when instantiting the class")
+    #     else:
+    #         users_with_stock = model.objects.filter(symbol = self.symbol).values_list('email', flat=True).distinct()
+    #         users_with_stock = [email for email in users_with_stock]
+    #         return users_with_stock
 
 class EmailSendingView(View):
 

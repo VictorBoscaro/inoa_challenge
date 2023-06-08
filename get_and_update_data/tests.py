@@ -3,7 +3,7 @@
 from django.test import TestCase
 from datetime import datetime, timedelta
 from get_and_update_data.models import AssetPrice, StockPortfolio
-from get_and_update_data.entities.get_and_upload_data import PriceGetter, UploadData
+from get_and_update_data.management.commands.get_and_upload_data import PriceGetter, UploadData, UpdateRateFreq
 from .views import EmailSelector, RecommendationRule
 import pandas as pd
 from get_and_update_data.see_there_it_goes import DataRetriever

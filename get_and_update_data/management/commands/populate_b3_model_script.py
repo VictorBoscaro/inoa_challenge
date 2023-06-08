@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from get_and_update_data.models import B3Companie, AssetPrice
-from get_and_update_data.entities.get_and_upload_data import UploadData
+from get_and_update_data.management.commands.get_and_upload_data import UploadData
 import pandas as pd
 from datetime import datetime, timedelta
 import yfinance as yf
@@ -49,8 +49,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         b3_companies = self.b3_companies
-        start_date = pd.to_datetime("2023-04-01")
-        end_date = pd.to_datetime("2023-06-05")
+        start_date = datetime.today() - timedelta(60)
+        end_date = datetime.today()
 
         final_df = self.get_new_data(start_date, end_date, b3_companies)
 
@@ -176,15 +176,15 @@ class UpdateCompanies:
 
                     companies.save()
 
-# command = Command()
-# command.handle()
-# final_df = command.final_df
-# upload_data = UploadData(final_df)
-# upload_data.upload_new_data()
+command = Command()
+command.handle()
+final_df = command.final_df
+upload_data = UploadData(final_df)
+upload_data.upload_new_data()
 
 
-# companies_update = UpdateCompanies()
-# companies_update.handle()
+companies_update = UpdateCompanies()
+companies_update.handle()
 
 
 granularity = """1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d"""
