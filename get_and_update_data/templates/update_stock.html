@@ -5,18 +5,41 @@
 <head>
     <title>Update Stock</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 2% 10%;
+        }
+        .form-container {
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Update Stock</h1>
+    <div class="form-container">
+        <h1 class="mb-4">Atualizar Ativo no Portfólio</h1>
 
-    <form method="post">
-        {% csrf_token %}
-        <p>Symbol: {{ form.symbol }}</p>
-        <p>Date: {{ form.date }}</p>  <!-- Render date field -->
-        <p>Sold Date: {{ form.sold_date }}</p>
-        <p>Sold Price: {{ form.sold_price }}</p>
-        <button type="submit">Update</button>
-    </form>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_symbol">Symbol:</label>
+                {{ form.symbol }}
+            </div>
+            <div class="form-group">
+                <label for="id_date">Date:</label>
+                {{ form.date }}  <!-- Render date field -->
+            </div>
+            <div class="form-group">
+                <label for="id_sold_date">Sold Date:</label>
+                {{ form.sold_date }}
+            </div>
+            <div class="form-group">
+                <label for="id_sold_price">Sold Price:</label>
+                {{ form.sold_price }}
+            </div>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+    </div>
 
     <script>
     $(document).ready(function() {
