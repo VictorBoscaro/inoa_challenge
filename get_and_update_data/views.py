@@ -173,9 +173,9 @@ class EmailSelector:
     #         users_with_stock = [email for email in users_with_stock]
     #         return users_with_stock
 
-class EmailSendingView(View):
+class EmailSender(View):
 
-    def __init__(self, subject, message, email_list, from_email = 'victorboscaro@gmail.com'):
+    def __init__(self, subject, message, email_list, from_email = 'inoachallengetest@gmail.com'):
 
         self.subject = subject
         self.message = message
@@ -209,9 +209,9 @@ class RecommendationRule:
         comp_df = pd.merge(left = last_price, right = last_moving_average, left_index = True, right_index = True)
         comp_df['close'] = comp_df['close'].astype(float)
         comp_df['variation'] = (comp_df['close'] - comp_df['moving_average'])/comp_df['moving_average']
-        recommendation = comp_df[comp_df['variation'] <= var_threshold]
+        stocks_rec = comp_df[comp_df['variation'] <= var_threshold].index
         
-        return list(recommendation.index)
+        return list(stocks_rec)
     
     def sell_rule(self, sell_threshold = 0.1):
 

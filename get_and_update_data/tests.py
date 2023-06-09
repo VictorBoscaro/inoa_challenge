@@ -3,10 +3,9 @@
 from django.test import TestCase
 from datetime import datetime, timedelta
 from get_and_update_data.models import AssetPrice, StockPortfolio
-from get_and_update_data.management.commands.get_and_upload_data import PriceGetter, UploadData, UpdateRateFreq
-from .views import EmailSelector, RecommendationRule
+from .views import EmailSelector, RecommendationRule, EmailSender
 import pandas as pd
-from get_and_update_data.see_there_it_goes import DataRetriever
+from get_and_update_data.see_there_it_goes import DataRetriever, PriceGetter, DataUpdater, UpdateRateFreq
 from datetime import datetime
 from django.contrib.auth.models import User
 from .models import AssetPrice
@@ -193,3 +192,13 @@ class TestSellRecommendationRule(TestCase):
         self.assertEqual(len(result), 1)  # Expecting 1 stock to be sold
         self.assertEqual(result.iloc[0]['email'], 'test_user@example.com')
         self.assertEqual(result.iloc[0]['symbol'], 'AAPL')
+
+
+# a = RecommendationRule().purchase_rule(moving_average=7, var_threshold=0)
+# email_list = EmailSelector().purchase_email()
+# subject = 'Ações para comprar'
+# message = f'Recomendamos a compra das ações {a} por estarem com o preço abaixo da média móvel abaixo dos últimos 7 dias'
+# EmailSender(subject, message, email_list).send_email_to_user()
+
+from django.core.mail import send_mail
+send_mail(subject='Sim', message='Nao', recipient_list=['victorboscaro@gmail.com'], from_email='inoachallengetest@outlook.com')

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    extra_hosts:
+      - "pghost:172.18.0.1"
+    volumes:
+      - .:/code
+    command: python manage.py runserver
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=inoa_challenge.settings
+  db:
+    image: postgres:12
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=cabo2228
+      - POSTGRES_DB=postgres
+      - POSTGRES_PORT=5432

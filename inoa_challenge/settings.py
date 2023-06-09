@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'get_and_update_data',
-    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -132,3 +131,12 @@ STATICFILES_DIR = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CELERY_BROKER_URL = 'pyamqp://guest@localhost//'
+
+# Setting email configs
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'inoachallengetest@gmail.com'
+EMAIL_HOST_PASSWORD = 'cabo2228'
