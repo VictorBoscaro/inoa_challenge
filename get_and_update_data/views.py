@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View, FormView
-from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm, UpdateStockForm
+from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm, UpdateStockForm, B3CompanieForm
 from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
@@ -255,4 +255,18 @@ class GetDatesView(View):
                 "is_taken": False,
             }
             return JsonResponse(data)
-        
+
+class AddCompanieView(View):
+    form_class = B3CompanieForm
+    template_name = 'add_companie.html'
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('asset')
+        return render(request, self.template_name, {'form': form})

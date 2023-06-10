@@ -69,3 +69,8 @@ class UpdateStockForm(forms.ModelForm):
     class Meta:
         model = StockPortfolio
         fields = ('symbol', 'date', 'sold_date', 'sold_price')
+
+class B3CompanieForm(forms.ModelForm):
+    class Meta:
+        model = B3Companie
+        fields = ['symbol', 'minutes_update_rate']

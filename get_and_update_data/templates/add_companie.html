@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Adicionar nova empresa</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 2% 10%;
+        }
+        .form-container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1 class="mb-4">Adicionar/Atualizar empresa</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.symbol.id_for_label }}">{{ form.symbol.label }}</label>
+                {{ form.symbol }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.minutes_update_rate.id_for_label }}">{{ form.minutes_update_rate.label }}</label>
+                {{ form.minutes_update_rate }}
+            </div>
+            <button type="submit" class="btn btn-primary">Adicionar</button>
+        </form>
+    </div>
+</body>
+</html>
