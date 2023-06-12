@@ -165,17 +165,13 @@ class EmailSelector:
         all_email = [email for email in all_email]
         return all_email
     
-    # def sell_email(self, model = StockPortfolio):
-    #     if self.symbol == None:
-    #         raise ValueError("Insert a symbol when instantiting the class")
-    #     else:
-    #         users_with_stock = model.objects.filter(symbol = self.symbol).values_list('email', flat=True).distinct()
-    #         users_with_stock = [email for email in users_with_stock]
-    #         return users_with_stock
+    def sell_email(self, df):
+        stocks_to_sell_by_email = df.groupby('email').symbol.unique()
+        return stocks_to_sell_by_email
+        
+class EmailSender:
 
-class EmailSender(View):
-
-    def __init__(self, subject, message, email_list, from_email = 'inoachallengetest@gmail.com'):
+    def __init__(self, subject, message, email_list, from_email = 'inoachallengetest@outlook.com'):
 
         self.subject = subject
         self.message = message
