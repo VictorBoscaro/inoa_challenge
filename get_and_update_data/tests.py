@@ -194,11 +194,14 @@ class TestSellRecommendationRule(TestCase):
         self.assertEqual(result.iloc[0]['symbol'], 'AAPL')
 
 
-# a = RecommendationRule().purchase_rule(moving_average=7, var_threshold=0)
-# email_list = EmailSelector().purchase_email()
-# subject = 'Ações para comprar'
-# message = f'Recomendamos a compra das ações {a} por estarem com o preço abaixo da média móvel abaixo dos últimos 7 dias'
-# EmailSender(subject, message, email_list).send_email_to_user()
+a = RecommendationRule().sell_rule(0.1)
+email_list = EmailSelector().sell_email(a)
 
-from django.core.mail import send_mail
-send_mail(subject='Sim', message='Nao', recipient_list=['victorboscaro@gmail.com'], from_email='inoachallengetest@outlook.com')
+# print(email_list)
+# subject = 'Ações para comprar'
+# message = f'Recomendamos a compra das ações {a} por estarem com o preço abaixo da média móvel dos últimos 7 dias'
+# print('instantiating email sender')
+# email = EmailSender(subject, message, email_list)
+# print('sending email')
+# email.send_email_to_user()
+
