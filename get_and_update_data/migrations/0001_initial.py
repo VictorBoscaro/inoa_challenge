@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             name='AssetPrice',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('symbol', models.CharField(max_length=3)),
+                ('symbol', models.CharField(max_length=10)),
                 ('datetime', models.DateTimeField()),
                 ('open', models.DecimalField(decimal_places=2, max_digits=10)),
                 ('high', models.DecimalField(decimal_places=2, max_digits=10)),

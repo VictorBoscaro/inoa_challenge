@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             name='B3Companies',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('symbol', models.CharField()),
+                ('symbol', models.CharField(max_length=20)),
                 ('minutes_update_rate', models.IntegerField()),
                 ('run', models.DateField(auto_now=True)),
             ],

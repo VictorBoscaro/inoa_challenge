@@ -51,13 +51,19 @@ class RegistrationForm(forms.Form):
             # Create the user account
             user = User.objects.create_user(username=username, password=password, email=email)
 
-            # Assign the user to the stock group
-            stock_group = Group.objects.get(name='Stock Users')
-            user.groups.add(stock_group)
+            # # Assign the user to the stock group
+            # stock_group = Group.objects.get(name='Stock Users')
+            # user.groups.add(stock_group)
 
             return user
     
 class StockPortfolioForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        SYMBOL_CHOICES = B3Companie.objects.values_list('symbol', flat=True).distinct()
+        self.fields['symbol'].choices = [(value, value) for value in SYMBOL_CHOICES]
+
     class Meta:
         model = StockPortfolio
         fields = ('symbol', 'price', 'date')

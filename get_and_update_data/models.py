@@ -12,8 +12,8 @@ class AssetPrice(models.Model):
     adj_close = models.DecimalField(max_digits=20, decimal_places=10)
     volume = models.DecimalField(max_digits=20, decimal_places=10)
     run = models.DateTimeField()
-    symbol = models.CharField()
-    granularity = models.CharField(null=True)
+    symbol = models.CharField(max_length=20)
+    granularity = models.CharField(max_length = 10, null=True)
 
     class Meta:
         db_table = 'assets_price'
@@ -25,7 +25,7 @@ class AssetPrice(models.Model):
     
 class B3Companie(models.Model):
 
-    symbol = models.CharField()
+    symbol = models.CharField(max_length=20)
     minutes_update_rate = models.IntegerField()
     run = models.DateField(auto_now=True)
 
@@ -39,10 +39,7 @@ class B3Companie(models.Model):
 
 class StockPortfolio(models.Model):
 
-    SYMBOL_CHOICES = B3Companie.objects.values_list('symbol', flat=True).distinct()
-    SYMBOL_CHOICES = [(value, value) for value in SYMBOL_CHOICES]
-
-    symbol = models.CharField(max_length=10, choices=SYMBOL_CHOICES)
+    symbol = models.CharField(max_length=10)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     email = models.EmailField(null=True)

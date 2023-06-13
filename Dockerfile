@@ -15,3 +15,9 @@ RUN pip install -r requirements.txt
 
 # Copy project
 COPY . /inoa_challenge
+
+# Adding scripts to the Docker image
+ADD https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh /usr/wait-for-it.sh
+
+# Give execute permissions
+RUN chmod +x /usr/wait-for-it.sh

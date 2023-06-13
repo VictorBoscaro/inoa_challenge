@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AssetView, HomeView, RegistrationView, AddStockView, StockUpdateView, GetDatesView, AddCompanieView
+from .views import AssetView, HomeView, RegistrationView, AddStockView, StockUpdateView, GetDatesView, AddCompanieView, UpdateDatabase
 
 urlpatterns = [
     path('', HomeView.as_view(), name = 'home'),
@@ -9,5 +9,5 @@ urlpatterns = [
     path('update_stock/', StockUpdateView.as_view(), name='update_stock'),
     path('get_dates/', GetDatesView.as_view(), name = 'get_dates'),
     path('add_companie/', AddCompanieView.as_view(), name='add_companie'),
-    # Add other URL patterns as needed
+    path('asset_price/', UpdateDatabase.as_view(), name='update_stock'),
 ]

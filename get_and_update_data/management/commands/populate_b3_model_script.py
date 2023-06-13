@@ -1,10 +1,12 @@
 from django.core.management.base import BaseCommand
-from get_and_update_data.models import B3Companie, AssetPrice
-from get_and_update_data.management.commands.get_and_upload_data import UploadData
+from get_and_update_data.models import B3Companie, AssetPrice, StockPortfolio
 import pandas as pd
 from datetime import datetime, timedelta
 import yfinance as yf
 import os
+from django.contrib.auth.models import User
+from random import sample
+import numpy as np
 
 if "DJANGO_SETTINGS_MODULE" in os.environ:
     print("Django settings is in the enviroment")
@@ -49,7 +51,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         b3_companies = self.b3_companies
-        start_date = datetime.today() - timedelta(60)
+        start_date = datetime.today() - timedelta(30)
         end_date = datetime.today()
 
         final_df = self.get_new_data(start_date, end_date, b3_companies)
@@ -186,10 +188,8 @@ upload_data.upload_new_data()
 companies_update = UpdateCompanies()
 companies_update.handle()
 
-
-granularity = """1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d"""
+granularity = """15m, 30m, 60m, 90m, 1h, 1d"""
 granularities = list(map(lambda x: x.strip(), granularity.split(',')))
-
 
 start_date = (datetime.today() - timedelta(30)).strftime("%Y-%m-%d")
 end_date = datetime.today().strftime('%Y-%m-%d')
@@ -198,10 +198,10 @@ run = datetime.now()
 b3_companies = Command().b3_companies.keys()
 
 final_df = pd.DataFrame()
+print("Building a pandas dataframe with the information for each stock.")
 
 for company in b3_companies:
     
-    print(company)
     for granularity in granularities:
         print(granularity)
         if granularity == '1m':
@@ -240,6 +240,7 @@ for company in b3_companies:
                 data['granularity'] = granularity
                 final_df = pd.concat([final_df, data], axis = 0)
 
+print("Dataframe built")
 
 final_df = final_df.reset_index()
 final_df.columns = ['datetime', 'open', 'high', 'low', 'close', 'adj_close', 'volume', 'run', 'symbol', 'granularity']
@@ -249,13 +250,12 @@ final_df['low'] = final_df.low.round(4)
 final_df['close'] = final_df.close.round(4)
 final_df['adj_close'] = final_df.adj_close.round(4)
 final_df['volume'] = final_df.volume.round(4)
-print(final_df.info())
 
+print('Adding data to the assets table, it will take a while...')
 for _, row in final_df.iterrows():
     datetime = row['datetime']
     granularity = row['granularity']
     symbol = row['symbol']
-    print(datetime, symbol, granularity, row['open'], row['close'], row['low'], row['high'], row['adj_close'], row['volume'], row['run'])
     
     if not AssetPrice.objects.filter(datetime=datetime, symbol=symbol, granularity=granularity).exists():
                 
@@ -273,3 +273,49 @@ for _, row in final_df.iterrows():
                     granularity=granularity
                 )
                 asset_price.save()
+
+print('Creating users and adding stocks for them...')
+
+# Create users
+
+stocks = ['RADL3.SA', 'BBDC4.SA', 'CMIG4.SA', 'BBDC3.SA', 'JBSS3.SA', 'EQTL3.SA', 'BBSE3.SA', 'CCRO3.SA', 'BRKM5.SA', 'USIM5.SA', 'MULT3.SA', 'ITSA4.SA', 'BBAS3.SA', 'ENBR3.SA', 'OIBR4.SA', 'ECOR3.SA', 'UGPA3.SA', 'KLBN11.SA', 'PETR3.SA', 'SBSP3.SA', 'LREN3.SA', 'PETR4.SA']
+
+for i in range(5):
+    username = f"user{i+1}"
+    email = f"user{i+1}@example.com"
+    password = "password"
+    User.objects.create_user(username=username, email=email, password=password)
+
+# Populate StockPortfolio table
+for username in ["user1", "user2", "user3", "user4", "user5"]:
+    user_stocks = sample(stocks, 6)  # Select 6 random stocks for each user
+    sold_stocks = sample(user_stocks, 2)  # Select 2 stocks to mark as sold for each user
+
+    for stock in user_stocks:
+        date = datetime.now().date() - timedelta(days=30)  # Use a date from the last 30 days
+        price = np.random.randint(5, 50)
+        if stock in sold_stocks:
+            sold_date = date + timedelta(days=sample(range(1, 30), 1)[0])  # Use a random sold date within the last 30 days
+            sold_price = price - np.random.randint(-10, 15)  # Assuming a sold price lower than the original price
+
+            stock_portfolio = StockPortfolio(
+                symbol=stock,
+                price=price,
+                date=date,
+                email=None,
+                username=username,
+                sold_date=sold_date,
+                sold_price=sold_price
+            )
+            stock_portfolio.save()
+        else:
+            stock_portfolio = StockPortfolio(
+                symbol=stock,
+                price=price,
+                date=date,
+                email=None,
+                username=username
+            )
+            stock_portfolio.save()
+
+print("Data successfully populated.")
