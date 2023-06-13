@@ -1,8 +1,12 @@
 import plotly.express as px
 from .models import AssetPrice
 import pandas as pd
-from datetime import timedelta
+from datetime import timedelta, datetime
 import numpy as np
+from get_and_update_data.models import B3Companie
+import yfinance as yf
+import pytz
+from django.db.models import Max
 
 class LineChart:
 
@@ -66,21 +70,9 @@ class DataRetriever:
                  
         return dates, prices
 
-from get_and_update_data.models import B3Companie
-from django.core.management.base import BaseCommand
-from datetime import datetime
-import yfinance as yf
-import pandas as pd
-from datetime import datetime
-from datetime import timedelta
-from get_and_update_data.models import AssetPrice
-from django.db import models
-import pytz
-from django.db.models import Max
-
 class UpdateRateFreq:
 
-    def __init__(self, b3_companies = B3Companie):
+    def __init__(self, b3_companies = B3Companie()):
 
         self.b3_companies = b3_companies
     
@@ -118,7 +110,7 @@ class PriceGetter:
         now = datetime.now()
         companies_to_get_data = []
         
-        results = AssetPrice.objects.values("symbol").annotate(max_run=models.Max('run'), max_datetime=models.Max("datetime"))
+        results = AssetPrice.objects.values("symbol").annotate(max_run=Max('run'), max_datetime=Max("datetime"))
 
         max_datetime_from_db_dict = {}
 
@@ -200,7 +192,7 @@ class DataUpdater:
             granularity = row['granularity']
             
             
-            results = AssetPrice.objects.values("symbol").filter(symbol=symbol, granularity=granularity).annotate(max_datetime=models.Max("datetime"))
+            results = AssetPrice.objects.values("symbol").filter(symbol=symbol, granularity=granularity).annotate(max_datetime=Max("datetime"))
             if results:
                 max_datetime = results[0]['max_datetime']
                 max_datetime = TimeZone().to_timezone(max_datetime)

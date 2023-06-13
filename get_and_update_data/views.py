@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View, FormView
 from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm, UpdateStockForm, B3CompanieForm
-from get_and_update_data.see_there_it_goes import LineChart, DataRetriever
+from get_and_update_data.see_there_it_goes import LineChart, DataRetriever, DataUpdater
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -63,8 +63,8 @@ class RegistrationView(FormView):
         user = User.objects.create_user(username=username, password=password, email=email)
 
         # Assign the user to the desired group
-        group = Group.objects.get(name='StockPortfolio Writers')  # Replace 'your_group_name' with the actual group name
-        group.user_set.add(user)
+        # group = Group.objects.get(name='StockPortfolio Writers')  # Replace 'your_group_name' with the actual group name
+        # group.user_set.add(user)
 
         return redirect(self.success_url)
 
@@ -152,7 +152,6 @@ class StockUpdateView(LoginRequiredMixin, View):
 
         return render(request, 'update_stock.html', {'form': form})
     
-
 class EmailSelector:
 
     # def __init__(self):
@@ -266,3 +265,12 @@ class AddCompanieView(View):
             form.save()
             return redirect('asset')
         return render(request, self.template_name, {'form': form})
+    
+class UpdateDatabase(View):
+    def post(self, request):
+        data_updater = DataUpdater()
+        data_updater.update_stock_portfolio()
+        return JsonResponse({'success': True})
+
+    def get(self, request):
+        return JsonResponse({'success': False})
