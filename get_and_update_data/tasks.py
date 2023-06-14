@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
-from .see_there_it_goes import DataUpdater, PriceGetter, TimeZone, UpdateRateFreq
+from .data_treatment import DataUpdater
 from celery import shared_task
-from .models import MyModel
 from .views import RecommendationRule, EmailSender, EmailSelector
 
 @shared_task

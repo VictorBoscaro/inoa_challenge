@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View, FormView
 from .forms import CompanyForm, LoginForm, RegistrationForm, StockPortfolioForm, UpdateStockForm, B3CompanieForm
-from get_and_update_data.see_there_it_goes import LineChart, DataRetriever, DataUpdater
+from get_and_update_data.aux_classes import LineChart
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -12,6 +12,7 @@ from django_pandas.io import read_frame
 from django.http import JsonResponse
 from datetime import timedelta, datetime
 import pandas as pd
+from .data_treatment import DataUpdater, DataRetriever
 
 class HomeView(FormView):
     template_name = 'home.html'
