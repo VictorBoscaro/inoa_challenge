@@ -61,8 +61,11 @@ class StockPortfolioForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        SYMBOL_CHOICES = B3Companie.objects.values_list('symbol', flat=True).distinct()
-        self.fields['symbol'].choices = [(value, value) for value in SYMBOL_CHOICES]
+
+        companies = B3Companie.objects.values_list('symbol', flat=True).distinct()
+        companies_unique = [(value, value) for value in companies]
+        
+        self.fields['symbol'].widget = forms.Select(choices=companies_unique)
 
     class Meta:
         model = StockPortfolio

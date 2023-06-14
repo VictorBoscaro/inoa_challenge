@@ -188,7 +188,7 @@ upload_data.upload_new_data()
 companies_update = UpdateCompanies()
 companies_update.handle()
 
-granularity = """15m, 30m, 60m, 90m, 1h, 1d"""
+granularity = "15m, 30m, 60m, 90m, 1h, 1d"
 granularities = list(map(lambda x: x.strip(), granularity.split(',')))
 
 start_date = (datetime.today() - timedelta(30)).strftime("%Y-%m-%d")

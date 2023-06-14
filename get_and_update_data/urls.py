@@ -9,5 +9,5 @@ urlpatterns = [
     path('update_stock/', StockUpdateView.as_view(), name='update_stock'),
     path('get_dates/', GetDatesView.as_view(), name = 'get_dates'),
     path('add_companie/', AddCompanieView.as_view(), name='add_companie'),
-    path('asset_price/', UpdateDatabase.as_view(), name='update_stock'),
+    path('asset_price/', UpdateDatabase.as_view(), name='update_database'),
 ]
