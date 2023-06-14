@@ -72,7 +72,7 @@ class DataRetriever:
 
 class UpdateRateFreq:
 
-    def __init__(self, b3_companies = B3Companie()):
+    def __init__(self, b3_companies = AssetPrice):
 
         self.b3_companies = b3_companies
     
@@ -177,9 +177,9 @@ class PriceGetter:
     
 class DataUpdater:
 
-    def __init__(self, data_to_upload = PriceGetter()):
+    def __init__(self, data_to_upload = PriceGetter):
 
-        self._data_to_upload = data_to_upload.get_new_data()
+        self._data_to_upload = data_to_upload().get_new_data()
 
     def update_data(self):
 
