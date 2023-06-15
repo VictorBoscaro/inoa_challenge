@@ -37,6 +37,8 @@ docker-compose up --build -d
 ```
 
 ### Application Features
-1 - Stock price monitoring 
+1 - Stock price monitoring
+
 2 - Database to store stock prices
+
 3 - Email alerts - To use this functionality run: docker-compose exec -it web python manage.py send_email
