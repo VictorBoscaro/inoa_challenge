@@ -23,7 +23,7 @@ docker-compose --version
 
 Clone the repository:
 ```sh
-git clone https://github.com/username/inoa_challenge.git
+git clone https://github.com/VictorBoscaro/inoa_challenge.git
 ```
 
 Navigate to the project directory
