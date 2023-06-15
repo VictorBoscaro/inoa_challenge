@@ -22,13 +22,19 @@ docker-compose --version
 ```
 
 Clone the repository:
+```sh
 git clone https://github.com/username/inoa_challenge.git
+```
 
 Navigate to the project directory
+```sh
 cd inoa_challenge
+```
 
 Build and run the Docker containers
+```sh
 docker-compose up --build -d
+```
 
 ### Application Features
 Stock price monitoring
