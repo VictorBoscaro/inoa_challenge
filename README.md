@@ -42,3 +42,11 @@ docker-compose up --build -d
 2 - Database to store stock prices
 
 3 - Email alerts - To use this functionality run: docker-compose exec -it web python manage.py send_email
+
+### Users available
+If the application is started using Docker, you will be able to access a test account:
+
+```sh
+Login: user1
+Password: password
+```
