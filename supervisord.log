@@ -13,3 +13,13 @@
 2023-06-15 00:21:29,621 INFO waiting for cron, server to die
 2023-06-15 00:21:29,682 INFO stopped: server (exit status 0)
 2023-06-15 00:21:29,685 INFO stopped: cron (terminated by SIGTERM)
+2023-06-15 00:33:52,394 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2023-06-15 00:33:52,403 INFO supervisord started with pid 1
+2023-06-15 00:33:53,407 INFO spawned: 'cron' with pid 7
+2023-06-15 00:33:53,410 INFO spawned: 'server' with pid 8
+2023-06-15 00:33:54,418 INFO success: cron entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2023-06-15 00:33:54,418 INFO success: server entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2023-06-15 00:35:01,784 INFO reaped unknown pid 21 (exit status 0)
+2023-06-15 00:40:02,075 INFO reaped unknown pid 31 (exit status 0)
+2023-06-15 00:45:02,111 INFO reaped unknown pid 39 (exit status 0)
+2023-06-15 00:50:02,165 INFO reaped unknown pid 86 (exit status 0)
