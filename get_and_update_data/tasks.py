@@ -14,8 +14,11 @@ def send_buy_email():
     email_list = EmailSelector().purchase_email()
     subject = 'Ações para comprar'
     message = f'Recomendamos a compra das ações {stocks_to_buy} por estarem com o preço abaixo da média móvel abaixo dos últimos 7 dias'
-    email = EmailSender(subject, message, email_list)
-    email.send_email_to_user()
+    if len(stocks_to_buy) > 0:
+        email = EmailSender(subject, message, email_list)
+        email.send_email_to_user()
+    else:
+        print('There is not recommendations for today.')
 
 @shared_task
 def send_sell_email():

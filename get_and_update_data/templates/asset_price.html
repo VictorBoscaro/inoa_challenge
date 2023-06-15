@@ -126,7 +126,7 @@
     </div>
 
     <div class="content-block">
-        <form method="post" action="{% url 'update_stock' %}" class="d-inline">
+        <form method="post" action="{% url 'update_database' %}" class="d-inline">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">Atualizar Banco de dados</button>
         </form>

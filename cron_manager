@@ -1,0 +1,1 @@
+*/5 * * * * root cd /inoa_challenge && python manage.py tasks >> /var/log/cron.log 2>&1

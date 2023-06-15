@@ -69,3 +69,22 @@ class StockPortfolio(models.Model):
             if not self.date:
                 self.date = datetime.now().strftime("%Y-%m-%d")
         super().save(*args, **kwargs)
+
+from django.db import models
+
+class EmailRecord(models.Model):
+    EMAIL_TYPE_CHOICES = [
+        ('BUY', 'Buy'),
+        ('SELL', 'Sell'),
+    ]
+
+    date_received = models.DateTimeField(auto_now_add=True)
+    email = models.EmailField()
+    type = models.CharField(max_length=4, choices=EMAIL_TYPE_CHOICES)
+    
+    class Meta:
+        db_table = 'emails_sent'
+        unique_together = ('date_received', 'email', 'type')
+
+    def __str__(self):
+        return f"{self.email} ({self.type})"

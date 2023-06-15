@@ -5,7 +5,7 @@ from get_and_update_data.aux_classes import LineChart
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import StockPortfolio, AssetPrice
+from .models import StockPortfolio, AssetPrice, EmailRecord
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django_pandas.io import read_frame
@@ -152,22 +152,41 @@ class StockUpdateView(LoginRequiredMixin, View):
             return redirect('asset')
 
         return render(request, 'update_stock.html', {'form': form})
-    
+
+from django.utils import timezone 
+
+class EmailChecker:
+
+    def __init__(self, email_list, type):
+        self.email_list = email_list
+        self.type = type
+
+    def check_email(self):
+
+        today_min = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_max = today_min + timezone.timedelta(days=1)
+        users_to_send = []
+
+        for email in self.email_list:
+            if not EmailRecord.objects.filter(email=email, type=self.type, date_received__range=(today_min, today_max)).exists():
+                EmailRecord.objects.create(email=email, type=self.type)
+                users_to_send.append(email)
+        
+        return users_to_send
+
 class EmailSelector:
-
-    # def __init__(self):
-
-    #     self.symbol = symbol
 
     def purchase_email(self, model = User):
         
-        all_email = model.objects.values_list('email', flat=True).distinct()
-        all_email = [email for email in all_email]
-        return all_email
+        every_email = model.objects.values_list('email', flat=True).distinct()
+        every_email = [email for email in every_email]
+        emails_to_send = EmailChecker(every_email, 'BUY').check_email()
+        return emails_to_send
     
-    def sell_email(self, df):
-        stocks_to_sell_by_email = df.groupby('email').symbol.unique()
-        return stocks_to_sell_by_email
+    def sell_email(self, df: pd.DataFrame):
+        stocks_to_sell_by_email = df.groupby('email').symbol.unique().reset_index()
+        emails_to_send = EmailChecker(stocks_to_sell_by_email.email.to_list(), 'SELL').check_email()
+        return stocks_to_sell_by_email[stocks_to_sell_by_email.email.isin(emails_to_send)]
         
 class EmailSender:
 

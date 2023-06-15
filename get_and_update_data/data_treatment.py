@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import timedelta, datetime
-from get_and_update_data.models import AssetPrice
+from .models import AssetPrice
 import yfinance as yf
 from django.db.models import Max
 from .aux_classes import UpdateRateFreq, TimeZone
